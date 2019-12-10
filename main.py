@@ -10,6 +10,9 @@ im2 = np.array(Image.open(im2name))[:, :, 0] <= 128
 
 assert im1.shape[0] == im2.shape[1], "Images non-equal in height"
 
+for i in range(im1.shape[0]):
+    assert (True in im1[i, :]) == (True in im2[i, :])
+
 out = np.full((
     im1.shape[1], #Width
     im1.shape[0], #Height
