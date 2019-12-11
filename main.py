@@ -11,7 +11,9 @@ im2 = np.array(Image.open(im2name))[:, :, 0] <= 128
 assert im1.shape[0] == im2.shape[1], "Images non-equal in height"
 
 for i in range(im1.shape[0]):
-    assert (True in im1[i, :]) == (True in im2[i, :])
+    assert (True in im1[i, :]) == (True in im2[i, :]), (
+        "Images take up different rows, this would "
+        "cause an unwanted gap in the final product")
 
 out = np.full((
     im1.shape[1], #Width
@@ -28,8 +30,27 @@ def carve(dirc, a3d, a2d):
                 else:
                     a3d[:, y, x] = False
 
+def removeHidden(a3d):
+    for x in range(a3d.shape[0]):
+        for y in range(a3d.shape[1]):
+            for z in range(a3d.shape[2]):
+                if (True in a3d[x+1:, y, z]) and (True in a3d[x, y, z+1:]):
+                    a3d[x,y,z] = False
+
+def removeRedundant(a3d):
+    for x in range(a3d.shape[0]):
+        for y in range(a3d.shape[1]):
+            for z in range(a3d.shape[2]):
+                if (((True in a3d[x+1:, y, z]) or
+                    (True in a3d[:x, y, z])) and
+                   ((True in a3d[x, y, z+1:]) or
+                    (True in a3d[x, y, :z]))):
+                    a3d[x,y,z] = False
+
 carve(False, out, im1)
 carve(True, out, im2)
+removeHidden(out)
+removeRedundant(out)
 
 f = open("out.html", "w+")
 f.write("""<html>
