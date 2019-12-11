@@ -73,3 +73,5 @@ f.write("""
   </body>
 </html>""")
 f.close()
+
+np.save('out.npy', out)
