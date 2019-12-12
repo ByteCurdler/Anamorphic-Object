@@ -8,7 +8,7 @@ im2name = "b.png"
 im1 = np.array(Image.open(im1name))[:, :, 0] <= 128
 im2 = np.array(Image.open(im2name))[:, :, 0] <= 128
 
-assert im1.shape[0] == im2.shape[1], "Images non-equal in height"
+assert im1.shape[0] == im2.shape[0], "Images non-equal in height"
 
 for i in range(im1.shape[0]):
     assert (True in im1[i, :]) == (True in im2[i, :]), (
@@ -22,8 +22,8 @@ out = np.full((
 ), True)
 
 def carve(dirc, a3d, a2d):
-    for x in range(a2d.shape[0]):
-        for y in range(a2d.shape[1]):
+    for x in range(a2d.shape[1]):
+        for y in range(a2d.shape[0]):
             if not a2d[im1.shape[0]-1-y][(im2.shape[1]-1-x if dirc else x)]:
                 if not dirc:
                     a3d[x, y, :] = False
@@ -34,24 +34,30 @@ def removeHidden(a3d):
     for x in range(a3d.shape[0]):
         for y in range(a3d.shape[1]):
             for z in range(a3d.shape[2]):
-                if (True in a3d[x+1:, y, z]) and (True in a3d[x, y, z+1:]):
-                    a3d[x,y,z] = False
+                if a3d[x, y, z]:
+                    if (True in a3d[x+1:, y, z]) and (True in a3d[x, y, z+1:]):
+                        a3d[x,y,z] = False
 
 def removeRedundant(a3d):
     for x in range(a3d.shape[0]):
         for y in range(a3d.shape[1]):
             for z in range(a3d.shape[2]):
-                if (((True in a3d[x+1:, y, z]) or
-                    (True in a3d[:x, y, z])) and
-                   ((True in a3d[x, y, z+1:]) or
-                    (True in a3d[x, y, :z]))):
-                    a3d[x,y,z] = False
+                if a3d[x, y, z]:
+                    if (((True in a3d[x+1:, y, z]) or
+                        (True in a3d[:x, y, z])) and
+                       ((True in a3d[x, y, z+1:]) or
+                        (True in a3d[x, y, :z]))):
+                        a3d[x,y,z] = False
 
+print("Carving...")
 carve(False, out, im1)
 carve(True, out, im2)
+print("Removing hidden cubes...")
 removeHidden(out)
+print("Removing redundant cubes...")
 removeRedundant(out)
 
+print("Writing files...")
 f = open("out.html", "w+")
 f.write("""<html>
   <head>
@@ -75,3 +81,5 @@ f.write("""
 f.close()
 
 np.save('out.npy', out)
+
+print("Done!")
