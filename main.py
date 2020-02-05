@@ -15,47 +15,23 @@ for i in range(im1.shape[0]):
         "Images take up different rows, this would "
         "cause an unwanted gap in the final product")
 
-out = np.full((
-    im1.shape[1], #Width
-    im1.shape[0], #Height
-    im2.shape[1]  #Depth
-), True)
-
-def carve(dirc, a3d, a2d):
-    for x in range(a2d.shape[1]):
-        for y in range(a2d.shape[0]):
-            if not a2d[im1.shape[0]-1-y][(im2.shape[1]-1-x if dirc else x)]:
-                if not dirc:
-                    a3d[x, y, :] = False
-                else:
-                    a3d[:, y, x] = False
-
-def removeHidden(a3d):
-    for x in range(a3d.shape[0]):
-        for y in range(a3d.shape[1]):
-            for z in range(a3d.shape[2]):
-                if a3d[x, y, z]:
-                    if (True in a3d[x+1:, y, z]) and (True in a3d[x, y, z+1:]):
-                        a3d[x,y,z] = False
-
-def removeRedundant(a3d):
-    for x in range(a3d.shape[0]):
-        for y in range(a3d.shape[1]):
-            for z in range(a3d.shape[2]):
-                if a3d[x, y, z]:
-                    if (((True in a3d[x+1:, y, z]) or
-                        (True in a3d[:x, y, z])) and
-                       ((True in a3d[x, y, z+1:]) or
-                        (True in a3d[x, y, :z]))):
-                        a3d[x,y,z] = False
+def efficient(a, b):
+    out = np.full((
+        a.shape[1], #Width
+        a.shape[0], #Height
+        b.shape[1]  #Depth
+    ), False)
+    for i in range(out.shape[1]):
+        rows = [j for j in range(a.shape[1]) if a[a.shape[0]-1-i, j]]
+        cols = [j for j in range(b.shape[1]) if b[b.shape[0]-1-i, j]]
+        for j in range(max(len(rows), len(cols))):
+            out[rows[j] if j<len(rows) else rows[-1]][i
+              ][cols[j] if j<len(cols) else rows[-1]] = True
+    return out
 
 print("Carving...")
-carve(False, out, im1)
-carve(True, out, im2)
-print("Removing hidden cubes...")
-removeHidden(out)
-print("Removing redundant cubes...")
-removeRedundant(out)
+
+out = efficient(im1, im2)
 
 print("Writing files...")
 f = open("out.html", "w+")
