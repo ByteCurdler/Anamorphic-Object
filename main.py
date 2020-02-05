@@ -26,7 +26,7 @@ def efficient(a, b):
         cols = [j for j in range(b.shape[1]) if b[b.shape[0]-1-i, j]]
         for j in range(max(len(rows), len(cols))):
             out[rows[j] if j<len(rows) else rows[-1]][i
-              ][cols[j] if j<len(cols) else rows[-1]] = True
+              ][cols[j] if j<len(cols) else cols[-1]] = True
     return out
 
 print("Carving...")
