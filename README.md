@@ -1,4 +1,4 @@
-# Bidirectional-Object
+# Anamorphic-Object
  A generator for [anamorphic] objects.
  
 ![Cover image](./cover.png)
