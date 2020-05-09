@@ -22,6 +22,3 @@ for x in range(data.shape[0]):
             # change its location
             cube.location = (x/5, z/5, y/5)
             cube.scale = (0.1,0.1,0.1)
-
-            # done
-            print("Done creating MyCube at position " + strVector3(cube.location) + " with name " + cube.name)
